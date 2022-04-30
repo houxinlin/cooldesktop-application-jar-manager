@@ -22,6 +22,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation(files("/home/HouXinLin/apps/Developer/jdk1.8.0_241/jdk1.8.0_241/lib/tools.jar"))
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
