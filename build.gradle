@@ -29,3 +29,6 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+tasks.jar{
+    entryCompression=ZipEntryCompression.STORED
+}

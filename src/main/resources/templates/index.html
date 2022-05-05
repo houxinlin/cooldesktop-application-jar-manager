@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <base href="/asr/100005/static/">
+    <base href="/asr/100005/static/">
     <meta charset="UTF-8">
     <title>Jar管理</title>
-
-    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="element.css">
     <script src="vue.js"></script>
     <script src="element.js"></script>
@@ -27,25 +25,30 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #d85353;
         }
+
         body {
-            /*background: #d972728a;*/
+            background: #d972728a;
         }
-        .el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf{
+
+        .el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf {
             border-bottom: 1px #ffffff2e solid;
         }
 
-        .el-table th.el-table__cell{
+        .el-table th.el-table__cell {
             background: transparent;
             color: #ffffff;
         }
-        .el-table--enable-row-hover .el-table__body tr:hover>td.el-table__cell{
+
+        .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
             background: transparent;
 
         }
+
         .el-table {
             background-color: transparent;
             color: #ffffff;
         }
+
         .el-table th, .el-table tr, .el-table td {
             border: 0;
             background-color: transparent;
@@ -60,13 +63,17 @@
 <div id="app">
     <el-table :data="tableData">
         <el-table-column prop="name" label="名称"></el-table-column>
+        <el-table-column prop="id" label="进程ID"></el-table-column>
         <el-table-column prop="name" label="参数">
             <template #default="scope">
-                <el-button size="small" type="success" @click="viewPropertiesClick(scope.$index, scope.row)">查看</el-button>
+                <el-button size="small" type="success" @click="viewPropertiesClick(scope.$index, scope.row)">查看
+                </el-button>
             </template>
         </el-table-column>
         <el-table-column label="操作">
             <template #default="scope">
+                <el-button size="small" type="success" @click="hotSwap(scope.$index, scope.row)">热替换
+                </el-button>
                 <el-button size="small" type="warning" @click="handlerStopClick(scope.$index, scope.row)">终止</el-button>
             </template>
         </el-table-column>
@@ -89,26 +96,43 @@
             </span>
         </template>
     </el-dialog>
+    <el-dialog v-model="dialogClassUploadVisible" title="选择Class文件">
+        <el-alert :closable="false" :title="hotswapAlert" type="success"></el-alert>
 
+        <el-upload :before-upload="beforeUpload" :auto-upload="true" :data="uploadArg" :show-file-list="false"
+                   :on-success="uploadSuccessCallback" drag :action="rootPath+'upload'"
+                   :multiple="false">
+            <el-icon class="el-icon--upload">
+                <upload-filled/>
+            </el-icon>
+            <div class="el-upload__text">
+                请将Class文件托放到这里
+            </div>
+        </el-upload>
+    </el-dialog>
 </div>
 <script>
-    let rootPath = "/100005/"
-    // let rootPath = ""
+    let baseRootPath = "/100005/"
+    // let baseRootPath = ""
     let jarApp = null
     let app = {
         data() {
             return {
+                rootPath: baseRootPath,
+                hotswapAlert: "",
                 dialogVisible: false,
                 tableData: [],
                 counter: 0,
-                properties: []
+                properties: [],
+                dialogClassUploadVisible: false,
+                selectJid: {"user": 2},
+                uploadArg: {}
             }
         },
         created() {
             let that = this
-
             setInterval(function () {
-                fetch(`${rootPath}/list`).then(data => data.json())
+                fetch(`${baseRootPath}/list`).then(data => data.json())
                     .then((data) => {
                         that.counter++
                         that.tableData = data
@@ -116,8 +140,21 @@
             }, 1000)
         },
         methods: {
+            beforeUpload() {
+                this.uploadArg = {"jid": this.selectJid}
+            },
+            generatorUploadArg() {
+                return {"jid": this.jid}
+            },
+            hotSwap(index, row) {
+                this.dialogClassUploadVisible = true
+                this.selectJid = row.id
+            },
+            uploadSuccessCallback(response, file, fileList) {
+                this.hotswapAlert = response
+            },
             handlerStopClick(index, row) {
-                fetch(`${rootPath}/stop`, {
+                fetch(`${baseRootPath}/stop`, {
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     method: "POST",
                     body: `id=${row.id}`

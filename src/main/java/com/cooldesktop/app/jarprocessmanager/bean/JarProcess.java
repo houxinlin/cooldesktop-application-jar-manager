@@ -1,9 +1,7 @@
 package com.cooldesktop.app.jarprocessmanager.bean;
 
-import com.sun.tools.attach.AttachNotSupportedException;
 import com.sun.tools.attach.VirtualMachine;
 
-import java.io.IOException;
 import java.util.Properties;
 
 public class JarProcess {
@@ -18,10 +16,7 @@ public class JarProcess {
             VirtualMachine attach = VirtualMachine.attach(id + "");
             properties = attach.getSystemProperties();
             attach.detach();
-        } catch (AttachNotSupportedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
         }
     }
 
