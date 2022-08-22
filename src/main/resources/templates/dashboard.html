@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/desktop/webapplication/100005/static/">
+    <meta charset="UTF-8">
+    <title>仪表盘</title>
+    <script src="vue.js"></script>
+    <link rel="stylesheet" href="index.css">
+    <script src="echarts.min.js"></script>
+    <style>
+        .flex-row {
+            display: flex;
+        }
+
+        div .base-infos:nth-last-of-type(1) {
+            margin: 0;
+        }
+
+        .base-infos {
+            margin-right: 10px;
+            display: flex;
+            color: #fafafa;
+        }
+
+        .base-infos .description div:nth-of-type(1) {
+            font-size: 10px;
+        }
+
+        .base-infos .description div:nth-of-type(2) {
+            font-size: 17px;
+            margin-top: 5px;
+        }
+
+        .base-infos i {
+            margin-left: 31px;
+            position: relative;
+            bottom: -8px;
+        }
+
+        .card {
+            background: #ffffff1f;
+            padding: 7px;
+            border-radius: 4px;
+            min-width: 130px;
+        }
+        .card.no-radius{
+            border-radius: 0px !important;
+        }
+        .group-item {
+            margin-bottom: 20px;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+        .flex-2 {
+            flex: 2;
+        }
+
+        .mr-4 {
+            margin-right: 4px;
+        }
+
+        .height-200{
+            max-height: 200px;
+        }
+        .thread-lists{
+            overflow: auto;
+        }
+        .base-li{
+            border-radius: 3px;
+            padding: 3px;
+            cursor: pointer;
+        }
+        .base-li:hover{
+            background: #0000001f;
+        }
+        .padding-10{
+            padding: 10px;
+        }
+        .thread-info{
+            min-width: 520px;
+        }
+        article{
+            white-space: pre-line;
+        }
+        .fullwidth{
+            width: 100%;
+        }
+        input.big{
+            width: 250px;
+        }
+        .suggestion-list span{
+            display: inline-block;
+            padding: 5px 2px;
+        }
+        .suggestion-list span:hover{
+            background: #ffffff2b;
+        }
+        .suggestion-list li{
+            cursor: pointer;
+
+        }
+        .suggestion-list{
+            border-radius: 1px;
+            padding: 7px;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="group-item flex-row">
+        <div class="card base-infos">
+            <div class="description">
+                <div>启动时间</div>
+                <div>{{getData(dashboardDatas.startTime)}}</div>
+            </div>
+            <i>
+                <svg t="1661029658432" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     p-id="14813" width="48" height="48">
+                    <path d="M512.5 512.5m-448.5 0a448.5 448.5 0 1 0 897 0 448.5 448.5 0 1 0-897 0Z" fill="#F38F91"
+                          p-id="14814"></path>
+                    <path d="M512.5 935.91c233.842 0 423.41-189.568 423.41-423.41S746.341 89.09 512.5 89.09 89.09 278.659 89.09 512.5 278.659 935.91 512.5 935.91z m0 25.09C264.8 961 64 760.2 64 512.5S264.8 64 512.5 64 961 264.8 961 512.5 760.2 961 512.5 961z m-15.426-63.03a15.773 15.773 0 0 1-0.256-2.834c0-8.66 7.021-15.681 15.682-15.681 8.66 0 15.682 7.02 15.682 15.681 0 0.968-0.088 1.915-0.256 2.834 59.042-2.322 114.674-17.913 163.997-43.874a15.768 15.768 0 0 1-1.686-2.382c-4.33-7.5-1.76-17.092 5.74-21.422 7.5-4.33 17.092-1.76 21.422 5.74 0.492 0.851 0.894 1.73 1.21 2.624A387.81 387.81 0 0 0 838.657 718.61a15.77 15.77 0 0 1-2.624-1.211c-7.5-4.33-10.07-13.921-5.74-21.422 4.33-7.5 13.921-10.07 21.422-5.74 0.86 0.497 1.655 1.063 2.382 1.686 25.961-49.323 41.552-104.955 43.874-163.997-0.92 0.168-1.866 0.256-2.834 0.256-8.66 0-15.681-7.021-15.681-15.682 0-8.66 7.02-15.682 15.681-15.682 0.968 0 1.915 0.088 2.834 0.256-2.322-59.042-17.913-114.674-43.874-163.997a15.768 15.768 0 0 1-2.382 1.686c-7.5 4.33-17.092 1.76-21.422-5.74-4.33-7.5-1.76-17.092 5.74-21.422a15.77 15.77 0 0 1 2.624-1.21A387.81 387.81 0 0 0 718.61 186.343a15.77 15.77 0 0 1-1.211 2.624c-4.33 7.5-13.921 10.07-21.422 5.74-7.5-4.33-10.07-13.921-5.74-21.422a15.768 15.768 0 0 1 1.686-2.382C642.6 144.943 586.968 129.352 527.926 127.03c0.168 0.92 0.256 1.866 0.256 2.834 0 8.66-7.021 15.681-15.682 15.681-8.66 0-15.682-7.02-15.682-15.681 0-0.968 0.088-1.915 0.256-2.834-59.042 2.322-114.674 17.913-163.997 43.874 0.623 0.727 1.19 1.522 1.686 2.382 4.33 7.5 1.76 17.092-5.74 21.422-7.5 4.33-17.092 1.76-21.422-5.74a15.77 15.77 0 0 1-1.21-2.624A387.81 387.81 0 0 0 186.343 306.39c0.895 0.317 1.773 0.72 2.624 1.211 7.5 4.33 10.07 13.921 5.74 21.422-4.33 7.5-13.921 10.07-21.422 5.74a15.768 15.768 0 0 1-2.382-1.686C144.943 382.4 129.352 438.032 127.03 497.074c0.92-0.168 1.866-0.256 2.834-0.256 8.66 0 15.681 7.021 15.681 15.682 0 8.66-7.02 15.682-15.681 15.682-0.968 0-1.915-0.088-2.834-0.256 2.322 59.042 17.913 114.674 43.874 163.997a15.768 15.768 0 0 1 2.382-1.686c7.5-4.33 17.092-1.76 21.422 5.74 4.33 7.5 1.76 17.092-5.74 21.422a15.77 15.77 0 0 1-2.624 1.21A387.81 387.81 0 0 0 306.39 838.657a15.77 15.77 0 0 1 1.211-2.624c4.33-7.5 13.921-10.07 21.422-5.74 7.5 4.33 10.07 13.921 5.74 21.422a15.768 15.768 0 0 1-1.686 2.382c49.323 25.961 104.955 41.552 163.997 43.874z m15.426 12.848c-219.985 0-398.318-178.333-398.318-398.318 0-219.985 178.333-398.318 398.318-398.318 219.985 0 398.318 178.333 398.318 398.318 0 219.985-178.333 398.318-398.318 398.318z"
+                          fill="#7F4333" p-id="14815"></path>
+                    <path d="M495.433 534.282L240.51 678.86a5.32 5.32 0 0 1-7.206-1.925 5.143 5.143 0 0 1 1.893-7.086l253.51-143.778a28.038 28.038 0 0 1-3.396-13.42c0-9.776 4.983-18.39 12.551-23.45V324.69c0-8.666 7.025-15.69 15.69-15.69s15.69 7.024 15.69 15.69v164.512a28.285 28.285 0 0 1 10.944 14.05h224.415a9.4 9.4 0 1 1 0 18.799H540.186c-3.877 10.952-14.338 18.798-26.634 18.798a28.154 28.154 0 0 1-18.119-6.567z m18.119-5.965c8.665 0 15.69-7.014 15.69-15.666 0-8.652-7.025-15.665-15.69-15.665s-15.69 7.013-15.69 15.665 7.025 15.666 15.69 15.666z"
+                          fill="#FFFFFF" p-id="14816"></path>
+                </svg>
+            </i>
+        </div>
+        <div class="card base-infos">
+            <div class="description">
+                <div>JVM PID</div>
+                <div>{{dashboardDatas.pid}}</div>
+            </div>
+            <i>
+                <svg t="1661069522307" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                     xmlns="http://www.w3.org/2000/svg" p-id="16269" width="48" height="48">
+                    <path d="M511.716 513.023m-446.628 0a446.628 446.628 0 1 0 893.256 0 446.628 446.628 0 1 0-893.256 0Z"
+                          fill="#76C2AF" p-id="16270"></path>
+                    <path d="M679.202 792.166c0 15.417-12.498 27.914-27.914 27.914H372.145c-15.417 0-27.914-12.498-27.914-27.914 0-15.417 12.498-27.914 27.914-27.914h279.143c15.416-0.001 27.914 12.497 27.914 27.914z"
+                          fill="#231F20" p-id="16271"></path>
+                    <path d="M679.202 764.251c0 15.417-12.498 27.914-27.914 27.914H372.145c-15.417 0-27.914-12.498-27.914-27.914 0-15.417 12.498-27.914 27.914-27.914h279.143c15.416 0 27.914 12.498 27.914 27.914z"
+                          fill="#FFFFFF" p-id="16272"></path>
+                    <path d="M581.502 652.594s-13.957 83.743 41.871 83.743H400.059c55.829 0 41.871-83.743 41.871-83.743h139.572z"
+                          fill="#E0E0D1" p-id="16273"></path>
+                    <path d="M790.859 624.68c0 30.833-24.995 55.829-55.828 55.829H288.402c-30.833 0-55.829-24.995-55.829-55.829V317.623c0-30.833 24.995-55.829 55.829-55.829H735.03c30.833 0 55.828 24.995 55.828 55.829V624.68z"
+                          fill="#231F20" p-id="16274"></path>
+                    <path d="M288.402 631.659c-19.246 0-34.893-15.647-34.893-34.893V289.709c0-19.246 15.647-34.893 34.893-34.893H735.03c19.246 0 34.893 15.647 34.893 34.893v307.057c0 19.246-15.647 34.893-34.893 34.893H288.402z"
+                          fill="#4F5D73" p-id="16275"></path>
+                    <path d="M735.03 275.752c7.696 0 13.957 6.261 13.957 13.957v307.057c0 7.696-6.261 13.957-13.957 13.957H288.402c-7.696 0-13.957-6.261-13.957-13.957V289.709c0-7.696 6.261-13.957 13.957-13.957H735.03m0-41.872H288.402c-30.833 0-55.829 24.995-55.829 55.829v307.057c0 30.833 24.995 55.828 55.829 55.828H735.03c30.833 0 55.828-24.995 55.828-55.828V289.709c0.001-30.833-24.995-55.829-55.828-55.829z"
+                          fill="#FFFFFF" p-id="16276"></path>
+                    <path d="M762.961 622.987V260.124H431.463l208.695 362.863z" fill="#FFFFFF" p-id="16277"></path>
+                </svg>
+            </i>
+        </div>
+        <div class="card base-infos">
+            <div class="description">
+                <div>已运行</div>
+                <div>{{convertMiliseconds(dashboardDatas.uptime)}}</div>
+            </div>
+            <i>
+                <svg t="1661069578627" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                     xmlns="http://www.w3.org/2000/svg" p-id="18277" width="48" height="48">
+                    <path d="M511.374563 1022.356695c-282.20091 0-510.976-228.77509-510.976-510.982132C0.398563 229.173653 229.173653 0.398563 511.374563 0.398563c282.207042 0 510.982132 228.77509 510.982132 510.976a510.976 510.976 0 0 1-510.982132 510.982132z"
+                          fill="#5874CF" p-id="18278"></path>
+                    <path d="M511.374563 77.045269c-239.873533 0-434.329293 194.45576-434.329294 434.329294s194.45576 434.335425 434.329294 434.335425 434.335425-194.45576 434.335425-434.335425c0-239.873533-194.45576-434.329293-434.335425-434.329294z"
+                          fill="#839EF8" p-id="18279"></path>
+                    <path d="M754.093222 588.021269H473.05121a38.323353 38.323353 0 0 1-38.323354-38.323353V268.662036a38.323353 38.323353 0 1 1 76.646707 0v242.712527h242.718659a38.323353 38.323353 0 1 1 0 76.646706z"
+                          fill="#FFFFFF" p-id="18280"></path>
+                </svg>
+            </i>
+        </div>
+        <div class="card base-infos">
+            <div class="description">
+                <div>线程数</div>
+                <div>{{dashboardDatas.threadCount}}</div>
+            </div>
+            <i>
+                <svg t="1661069711847" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                     xmlns="http://www.w3.org/2000/svg" p-id="10994" width="48" height="48">
+                    <path d="M812.6 97.9h-76.8c-41.7 0-75.9 34.2-75.9 75.9v125.6c26.2 15 42.2 44.8 37.8 76.4l-37.8 268.3v208.7c0 41.7 34.2 75.9 75.9 75.9h76.8c41.7 0 75.9-34.2 75.9-75.9v-679c0-41.8-34.1-75.9-75.9-75.9z"
+                          fill="#05A9D9" p-id="10995"></path>
+                    <path d="M633 290l-76.1-10.7c-41.3-5.8-79.9 23.2-85.7 64.6L448 508.3c34.3 19.1 49 61.9 32.2 98l-65.9 141.8-11.7 83.4c-5.8 41.3 23.2 79.9 64.6 85.7l76.1 10.7c41.3 5.8 79.9-23.2 85.7-64.6L659.9 644V299.4c-8.1-4.7-17.1-8-26.9-9.4z"
+                          fill="#99C236" p-id="10996"></path>
+                    <path d="M659.8 299.4v344.7l37.8-268.3c4.4-31.6-11.6-61.5-37.8-76.4z" fill="#009F43"
+                          p-id="10997"></path>
+                    <path d="M443.3 505.5l-69.7-32.4c-37.9-17.6-83.2-1-100.8 36.8L143.4 788.4c-17.6 37.9-1 83.2 36.8 100.8l69.7 32.4c37.9 17.6 83.2 1 100.8-36.8l63.5-136.7L448 508.3c-1.6-0.9-3-2-4.7-2.8z"
+                          fill="#FDBA3E" p-id="10998"></path>
+                    <path d="M448 508.3l-33.8 239.9 65.9-141.8c16.9-36.3 2.3-79-32.1-98.1z" fill="#CAC134"
+                          p-id="10999"></path>
+                </svg>
+            </i>
+        </div>
+        <div class="card base-infos">
+            <div class="description">
+                <div>GC次数</div>
+                <div>{{dashboardDatas.gcCount}}</div>
+            </div>
+            <i>
+                <svg t="1661069778811" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                     xmlns="http://www.w3.org/2000/svg" p-id="19560" width="48" height="48">
+                    <path d="M453.585455 170.077091a46.545455 46.545455 0 0 1 0.232727 4.561454v276.526546a116.363636 116.363636 0 0 0 108.730182 116.130909l7.633454 0.232727h276.48a46.545455 46.545455 0 0 1 46.312727 51.293091c-0.279273 2.885818-0.558545 5.538909-0.930909 7.912727-28.904727 216.250182-214.109091 382.976-438.225454 382.976a442.181818 442.181818 0 0 1-442.181818-442.181818c0-225.419636 168.727273-411.461818 386.792727-438.737454a166.167273 166.167273 0 0 1 4.282182-0.465455 46.545455 46.545455 0 0 1 50.874182 41.751273z m120.552727-158.254546c6.981818 0.558545 12.939636 1.256727 18.013091 1.95491a489.006545 489.006545 0 0 1 416.302545 421.98109l1.536 13.405091a44.218182 44.218182 0 0 1-44.032 48.546909H616.727273a93.090909 93.090909 0 0 1-93.090909-93.090909V58.181818a46.545455 46.545455 0 0 1 50.548363-46.359273z"
+                          fill="#03D699" p-id="19561"></path>
+                </svg>
+            </i>
+        </div>
+        <div class="card base-infos">
+            <div class="description">
+                <div>类加载数</div>
+                <div>{{dashboardDatas.loadClassCount}}</div>
+            </div>
+            <i>
+                <svg t="1661054322207" class="icon" viewBox="0 0 1024 1024" version="1.1"
+                     xmlns="http://www.w3.org/2000/svg" p-id="12522" width="48" height="48">
+                    <path d="M820.148148 175.995259a75.851852 75.851852 0 0 1 75.851852 75.851852v392.305778a75.851852 75.851852 0 0 1-75.851852 75.851852H203.851852a75.851852 75.851852 0 0 1-75.851852-75.851852V251.847111a75.851852 75.851852 0 0 1 75.851852-75.851852h616.296296z m-43.994074 144.023704a31.990519 31.990519 0 0 0-45.150815-3.147852l-150.774518 131.147852-93.639111-93.354667-2.066963-1.896296a32.009481 32.009481 0 0 0-41.946074 0.777481l-182.044445 163.972741-1.972148 1.934222a32.009481 32.009481 0 0 0-0.379259 43.273482l1.934222 1.972148a32.009481 32.009481 0 0 0 43.254518 0.379259l159.478519-143.68237 93.297778 93.013333 2.029037 1.877334c11.946667 10.012444 29.582222 10.012444 41.566815-0.37926l173.264592-150.755555 2.010074-1.896296c11.434667-11.794963 12.117333-30.606222 1.137778-43.235556z"
+                          fill="#0CCA8A" p-id="12523"></path>
+                    <path d="M272.004741 784.004741m32.009481 0l415.990519 0q32.009481 0 32.009481 32.009481l0-0.018963q0 32.009481-32.009481 32.009482l-415.990519 0q-32.009481 0-32.009481-32.009482l0 0.018963q0-32.009481 32.009481-32.009481Z"
+                          fill="#0CCA8A" fill-opacity=".5" p-id="12524"></path>
+                </svg>
+            </i>
+        </div>
+    </div>
+
+    <div class="group-item flex-row">
+        <div class="card mr-4">
+            <div id="heap" style="width: 260px;height: 250px;">
+            </div>
+        </div>
+        <div class="card ">
+            <div id="heap-line" style="height: 250px;width: 500px">
+            </div>
+        </div>
+    </div>
+
+    <div class="group-item flex-row">
+        <div class="card  mr-4 flex-row">
+           <div>
+               <header>线程信息:</header>
+               <ul class="thread-lists height-200">
+                   <template v-for="(item, key) in dashboardDatas.threadIds">
+                       <li class="base-li" @click="threadClick(key)">{{item}} </li>
+                   </template>
+               </ul>
+           </div>
+            <div class="thread-info">
+                <header>详细信息:</header>
+                <article v-if="threadDumpInfo!=null" class="padding-10">
+                    <div>线程状态:{{threadDumpInfo.threadState}}</div>
+                    <div>线程ID:{{threadDumpInfo.threadId}}</div>
+                    {{threadDumpInfo.trace}}
+                </article>
+            </div>
+
+        </div>
+        <div class="card ">
+            <div id="thread-line" style="height: 250px; width: 500px">
+            </div>
+        </div>
+    </div>
+
+    <div class="group-item flex-row">
+        <div class="card fullwidth  mr-4 ">
+            <header>Dump Class</header>
+            <div class="flex-row">
+                <input  v-model="className" @input="classNameChange" class="big mr-4 base-input"/>
+                <button @click="dumpClass(className)">dump</button>
+            </div>
+            <ul class="suggestion-list">
+                <template v-for="item in suggest">
+                    <li @click="dumpClass(item)"><span>{{item}}</span></li>
+                </template>
+            </ul>
+   </div>
+    </div>
+</div>
+<script>
+    let baseRootPath = "/100005";
+    let codeEditor =null;
+    let jarApp = null;
+    let app = {
+        data() {
+            return {
+                suggest:[],
+                codeEditor :null,
+                className:"",
+                threadDumpInfo:null,
+                dashboardDatas: {},
+                rootPath: baseRootPath,
+                historyDashboardDatas: [],
+                jId:new URLSearchParams(window.location.search).get("jid")
+            }
+        },
+        mounted(){
+            let that = this
+            setInterval(function () {
+                fetch(`${baseRootPath}/infos?jid=${that.jId}`)
+                    .then(data => data.json())
+                    .then((data) => {
+                        if (that.historyDashboardDatas.length>20){
+                            that.historyDashboardDatas.splice(0,1);
+                        }
+                        that.historyDashboardDatas.push(data);
+                        that.dashboardDatas = data;
+                        that.createHeapData(data);
+                        that.createHeapLineData(data);
+                        that.createThreadLineData(data);
+                    })
+            }, 1000)
+        },
+        methods: {
+            dumpClass(name=null){
+                if (name==null) name =this.className
+                fetch(`${baseRootPath}/dumpClass?className=${name}&jid=${this.jId}`)
+                    .then(data => data.text())
+                    .then((data) => {
+                        window.parent.postMessage({ "action": "open-application", "param": { "applicationId": "100005", "page": `code?perviewId=${data}` } }, "*")
+                    })
+            },
+            classNameChange(e){
+                let  that =this;
+                fetch(`${baseRootPath}/suggestClassName?str=${ this.className}&jid=${this.jId}`)
+                    .then(data => data.json())
+                    .then((data) => {
+                        that.suggest=data;
+                    })
+            },
+            createThreadLineData(response){
+                let data = this.historyDashboardDatas.map((item, index, arr) => parseInt(item["threadCount"]))
+                let option = {
+                    xAxis: {
+                        type: 'category',
+                    },
+                    title: {
+                        text: '实时线程数',
+                        left: 'center',
+                        textStyle: {
+                            color: "#ffffff",
+                        }
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        textStyle: {
+                            color: "#ffffff",
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#ffffff',
+                            }
+                        },
+                        axisLabel: {
+                            formatter: '{value} 个'
+                        }
+                    },
+                    series: [
+                        {
+                            color: "#c548a0",
+                            data: data,
+                            type: 'line',
+                            smooth: true,
+                            areaStyle: {}
+                        }
+                    ]
+                };
+                let heapLineChart = echarts.init(document.getElementById('thread-line'));
+                heapLineChart.setOption(option);
+            },
+            threadClick(id){
+                let that =this;
+                fetch(`${baseRootPath}/threadInfos?jid=${that.jId}&threadId=${id}`)
+                    .then(data => data.json())
+                    .then((data) => {
+                        that.threadDumpInfo=data
+                    })
+            },
+            formatSize(bytes, decimalPoint) {
+                if (bytes === 0) return '0 Bytes';
+                let k = 1000, dm = decimalPoint || 2, sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+                    i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            },
+            createHeapLineData(response) {
+                let data = this.historyDashboardDatas.map((item, index, arr) => parseInt(item["heapUsedSize"]) / 1024 / 1024)
+                let option = {
+                    xAxis: {
+                        type: 'category',
+                    },
+                    title: {
+                        text: '实时堆内存',
+                        left: 'center',
+                        textStyle: {
+                            color: "#ffffff",
+                        }
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        textStyle: {
+                            color: "#ffffff",
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLine: {
+                            lineStyle: {
+                                color: '#ffffff',
+                            }
+                        },
+                        axisLabel: {
+                            formatter: '{value} MB'
+                        }
+                    },
+                    series: [
+                        {
+                            color: "#52d76c",
+                            data: data,
+                            type: 'line',
+                            smooth: true,
+                            areaStyle: {}
+                        }
+                    ]
+                };
+                let heapLineChart = echarts.init(document.getElementById('heap-line'));
+                heapLineChart.setOption(option);
+            },
+            createHeapData(response) {
+                let used = parseInt(response["heapUsedSize"]) ;
+                let noused = (parseInt(response["heapSize"]) - parseInt(response["heapUsedSize"])) ;
+                let option = {
+                    title: {
+                        text: '内存',
+                        left: 'center',
+                        textStyle: {
+                            color: "#ffffff",
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter:(value) => this.formatSize(value.data.value)
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        textStyle: {
+                            color: "#ffffff",
+                        }
+                    },
+
+                    series: [
+                        {
+                            laebl: {
+                                color: "#B9B8CE",
+                                normal:{
+                                    formatter: 'as'
+                                }
+                            },
+                            color: ["#d928a9", "#3ca459"],
+                            type: 'pie',
+                            radius: '50%',
+                            data: [
+                                {value: used, name: `已使用`},
+                                {value: noused, name:  `未使用`},
+                            ],
+
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+                let heapChart = echarts.init(document.getElementById('heap'));
+                heapChart.setOption(option)
+            },
+            getData(miliseconds) {
+                if (miliseconds === undefined) return "";
+                let now = new Date(miliseconds),
+                    y = now.getFullYear(),
+                    m = now.getMonth() + 1,
+                    d = now.getDate();
+                return y + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d) + " " + now.toTimeString().substr(0, 8);
+            },
+            convertMiliseconds(miliseconds) {
+                if (miliseconds === undefined) return "";
+                let days, hours, minutes, seconds, total_hours, total_minutes, total_seconds;
+                total_seconds = parseInt(Math.floor(miliseconds / 1000));
+                total_minutes = parseInt(Math.floor(total_seconds / 60));
+                total_hours = parseInt(Math.floor(total_minutes / 60));
+                days = parseInt(Math.floor(total_hours / 24));
+
+                seconds = parseInt(total_seconds % 60);
+                minutes = parseInt(total_minutes % 60);
+                hours = parseInt(total_hours % 24);
+                if (hours === 0) return `${minutes}分${seconds}秒`
+                if (days === 0) return `${hours}时${minutes}分${seconds}秒`
+                return `${days}天${hours}时${minutes}分${seconds}秒`
+            },
+        }
+
+    }
+    jarApp = Vue.createApp(app)
+    jarApp.mount("#app")
+</script>
+
+</body>
+</html>

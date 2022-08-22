@@ -1,34 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href="/asr/100005/static/">
+    <base href="/desktop/webapplication/100005/static/">
     <meta charset="UTF-8">
     <title>Jar管理</title>
     <link rel="stylesheet" href="element.css">
+    <link rel="stylesheet" href="index.css">
     <script src="vue.js"></script>
     <script src="element.js"></script>
     <style>
-        ::-webkit-scrollbar {
-            width: 7px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #00000000;
-            border-radius: 2px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #ff6c6c;
-            border-radius: 13px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #d85353;
-        }
-
-        body {
-            background: #d972728a;
-        }
 
         .el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf {
             border-bottom: 1px #ffffff2e solid;
@@ -72,8 +52,8 @@
         </el-table-column>
         <el-table-column label="操作">
             <template #default="scope">
-                <el-button size="small" type="success" @click="hotSwap(scope.$index, scope.row)">热替换
-                </el-button>
+                <el-button size="small" type="info" @click="dashboard(scope.$index, scope.row)">仪表盘</el-button>
+                <el-button size="small" type="success" @click="hotSwap(scope.$index, scope.row)">热替换</el-button>
                 <el-button size="small" type="warning" @click="handlerStopClick(scope.$index, scope.row)">终止</el-button>
             </template>
         </el-table-column>
@@ -105,15 +85,12 @@
             <el-icon class="el-icon--upload">
                 <upload-filled/>
             </el-icon>
-            <div class="el-upload__text">
-                请将Class文件托放到这里
-            </div>
+            <div class="el-upload__text">请将Class文件托放到这里</div>
         </el-upload>
     </el-dialog>
 </div>
 <script>
-    let baseRootPath = "/100005/"
-    // let baseRootPath = ""
+    let baseRootPath = "/100005"
     let jarApp = null
     let app = {
         data() {
@@ -145,6 +122,10 @@
             },
             generatorUploadArg() {
                 return {"jid": this.jid}
+            },
+            dashboard(index,row){
+               location.href="/100005/dashboard?jid="+row.id
+              //  window.parent.postMessage({ "action": "open-application", "param": { "applicationId": "100005", "page": "deshboard.html" } }, "*")
             },
             hotSwap(index, row) {
                 this.dialogClassUploadVisible = true

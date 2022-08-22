@@ -10,6 +10,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class VMUtils {
+
+    /**
+    * @description: 释放agent
+    * @date: 2022/8/21 上午9:02
+    */
     private static void unAgent() throws IOException {
         InputStream resourceAsStream = VMUtils.class.getResourceAsStream("/static/hotswap-agent.jar");
         if (resourceAsStream != null) {
@@ -23,16 +28,17 @@ public class VMUtils {
         String workPath = FileUtils.getWorkPath();
         return Paths.get(workPath, "hotswap-agent.jar").toString();
     }
-
+    public static boolean loadAgent(int jId, UrlArgBuilder urlArgs) {
+        return loadAgent(jId,urlArgs.toString());
+    }
     public static boolean loadAgent(int jId, String urlArgs) {
         try {
             if (!Files.exists(Paths.get(getHotswapAgentPath()))) unAgent();
-
             VirtualMachine attach = VirtualMachine.attach(String.valueOf(jId));
             attach.loadAgent(getHotswapAgentPath(), urlArgs);
             return true;
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return false;
     }

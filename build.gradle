@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.6.7'
+    id 'org.springframework.boot' version '2.6.0'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
@@ -22,8 +22,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    implementation(files("/home/HouXinLin/apps/Developer/jdk1.8.0_241/jdk1.8.0_241/lib/tools.jar"))
+    implementation(files("//home/HouXinLin/apps/developer-apps/java/jdk/jdk8/lib/tools.jar"))
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation(files(("/home/HouXinLin/projects/java/cool/cooldesktop-apps/cooldesktop-app-rmi-info/cooldesktop-app-rmi-info/build/libs/cooldesktop-app-rmi-info-1.0-SNAPSHOT.jar")))
+// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-thymeleaf
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:2.7.3")
+
 }
 
 tasks.named('test') {
@@ -31,4 +35,5 @@ tasks.named('test') {
 }
 tasks.jar{
     entryCompression=ZipEntryCompression.STORED
+    duplicatesStrategy=DuplicatesStrategy.EXCLUDE
 }

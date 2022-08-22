@@ -14,7 +14,6 @@ public class UrlArgBuilder {
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
-
         urlMap.forEach((key, value) -> {
             result.append(key + "=" + value);
             result.append("&");
