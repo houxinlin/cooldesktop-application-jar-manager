@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href="/desktop/webapplication/100005/static/">
+<!--    <base href="/desktop/webapplication/100005/static/">-->
     <meta charset="UTF-8">
     <title>Jar管理</title>
     <link rel="stylesheet" href="element.css">
@@ -9,31 +9,24 @@
     <script src="vue.js"></script>
     <script src="element.js"></script>
     <style>
-
         .el-table td.el-table__cell, .el-table th.el-table__cell.is-leaf {
             border-bottom: 1px #ffffff2e solid;
         }
-
         .el-table th.el-table__cell {
             background: transparent;
             color: #ffffff;
         }
-
         .el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
             background: transparent;
-
         }
-
         .el-table {
             background-color: transparent;
             color: #ffffff;
         }
-
         .el-table th, .el-table tr, .el-table td {
             border: 0;
             background-color: transparent;
         }
-
         .el-table th, .el-table tr {
             background-color: transparent;
         }
@@ -46,29 +39,21 @@
         <el-table-column prop="id" label="进程ID"></el-table-column>
         <el-table-column prop="name" label="参数">
             <template #default="scope">
-                <el-button size="small" type="success" @click="viewPropertiesClick(scope.$index, scope.row)">查看
+                <el-button size="small" type="success" @click="viewJvmProperties(scope.$index, scope.row)">查看
                 </el-button>
             </template>
         </el-table-column>
         <el-table-column label="操作">
             <template #default="scope">
-                <el-button size="small" type="info" @click="dashboard(scope.$index, scope.row)">仪表盘</el-button>
+                <el-button size="small" type="primary" @click="dashboard(scope.$index, scope.row)">仪表盘</el-button>
                 <el-button size="small" type="success" @click="hotSwap(scope.$index, scope.row)">热替换</el-button>
                 <el-button size="small" type="warning" @click="handlerStopClick(scope.$index, scope.row)">终止</el-button>
             </template>
         </el-table-column>
     </el-table>
-
-    <el-dialog
-            v-model="dialogVisible"
-            title="参数"
-            width="40%"
-            :before-close="handleClose">
+    <el-dialog v-model="dialogVisible" title="参数" width="40%" :before-close="handleClose">
         <span>
-            <div style="margin-bottom: 10px;border-bottom: 1px #f1f1f1 solid;" v-for="(val,key,i) in properties"
-                 :key="i">
-                {{key}} : {{val}}
-            </div>
+            <div style="margin-bottom: 10px;border-bottom: 1px #f1f1f1 solid;" v-for="(val,key,i) in properties" :key="i">{{key}} : {{val}}</div>
         </span>
         <template #footer>
             <span class="dialog-footer">
@@ -76,11 +61,10 @@
             </span>
         </template>
     </el-dialog>
-    <el-dialog v-model="dialogClassUploadVisible" title="选择Class文件">
+    <el-dialog :before-close="dialogClose" v-model="dialogClassUploadVisible" title="选择Class文件">
         <el-alert :closable="false" :title="hotswapAlert" type="success"></el-alert>
-
-        <el-upload :before-upload="beforeUpload" :auto-upload="true" :data="uploadArg" :show-file-list="false"
-                   :on-success="uploadSuccessCallback" drag :action="rootPath+'upload'"
+        <el-upload :before-upload="beforeUpload"  :auto-upload="true" :data="uploadArg" :show-file-list="false"
+                   :on-success="uploadSuccessCallback" drag :action="rootPath+'/upload'"
                    :multiple="false">
             <el-icon class="el-icon--upload">
                 <upload-filled/>
@@ -90,13 +74,14 @@
     </el-dialog>
 </div>
 <script>
-    let baseRootPath = "/100005"
-    let jarApp = null
+
+    let baseRootPath = "/100005";
+    let jarApp = null;
     let app = {
         data() {
             return {
                 rootPath: baseRootPath,
-                hotswapAlert: "",
+                hotswapAlert: "请选择Class文件",
                 dialogVisible: false,
                 tableData: [],
                 counter: 0,
@@ -117,15 +102,20 @@
             }, 1000)
         },
         methods: {
+            dialogClose(){
+                this.dialogClassUploadVisible=false;
+                this.hotswapAlert="";
+            },
             beforeUpload() {
                 this.uploadArg = {"jid": this.selectJid}
             },
-            generatorUploadArg() {
-                return {"jid": this.jid}
-            },
+
             dashboard(index,row){
-               location.href="/100005/dashboard?jid="+row.id
-              //  window.parent.postMessage({ "action": "open-application", "param": { "applicationId": "100005", "page": "deshboard.html" } }, "*")
+                if (self===top){
+                    location.href="/100005/dashboard?jid="+row.id
+                    return
+                }
+               window.parent.postMessage({ "action": "open-application", "param": { "applicationId": "100005", "page": `dashboard?jid=${row.id}`,"property":{"windowTitle":"仪表盘","autoSaveWindowSize":false}  } }, "*")
             },
             hotSwap(index, row) {
                 this.dialogClassUploadVisible = true
@@ -142,12 +132,11 @@
                 }).then(data => data.json()).then((data) => {
                 })
             },
-            viewPropertiesClick(index, row) {
+            viewJvmProperties(index, row) {
                 this.dialogVisible = true
                 this.properties = row.properties
             }
         },
-
     }
     jarApp = Vue.createApp(app)
     jarApp.use(ElementPlus);

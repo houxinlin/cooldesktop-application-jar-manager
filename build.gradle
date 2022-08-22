@@ -37,3 +37,11 @@ tasks.jar{
     entryCompression=ZipEntryCompression.STORED
     duplicatesStrategy=DuplicatesStrategy.EXCLUDE
 }
+jar{
+    doLast{
+        copy {
+            from(file("/home/HouXinLin/projects/java/cool/cooldesktop-apps/jar-process-manager/build/libs/jar-process-manager-0.0.1-SNAPSHOT-plain.jar"))
+            into(file("/home/hxl/cooldesktop-work/app/easy/"))
+        }
+    }
+}

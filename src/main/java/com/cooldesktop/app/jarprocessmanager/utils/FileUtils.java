@@ -17,6 +17,18 @@ public class FileUtils {
         return null;
     }
 
+    public static boolean isClass(byte[] bytes) {
+        return convertByteArrayToInt(bytes) == -889275714;
+    }
+
+    private static int convertByteArrayToInt(byte[] data) {
+        if (data == null || data.length < 4) return 0x0;
+        return (0xff & data[0]) << 24 |
+                (0xff & data[1]) << 16 |
+                (0xff & data[2]) << 8 |
+                (0xff & data[3]);
+    }
+
     public static String createTempFile(int jid, String className) {
         return (Paths.get(getWorkPath(), jid + "_" + className + ".tmp")).toString();
     }

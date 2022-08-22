@@ -38,70 +38,76 @@
         }
 
         .card {
-            background: #ffffff1f;
+            background: #9b9b9b0d;
             padding: 7px;
             border-radius: 4px;
             min-width: 130px;
         }
-        .card.no-radius{
+
+        .card.no-radius {
             border-radius: 0px !important;
         }
+
         .group-item {
             margin-bottom: 20px;
-        }
-
-        .flex-1 {
-            flex: 1;
-        }
-        .flex-2 {
-            flex: 2;
         }
 
         .mr-4 {
             margin-right: 4px;
         }
 
-        .height-200{
+        .height-200 {
             max-height: 200px;
         }
-        .thread-lists{
+
+        .thread-lists {
             overflow: auto;
         }
-        .base-li{
+
+        .base-li {
             border-radius: 3px;
             padding: 3px;
             cursor: pointer;
         }
-        .base-li:hover{
+
+        .base-li:hover {
             background: #0000001f;
         }
-        .padding-10{
+
+        .padding-10 {
             padding: 10px;
         }
-        .thread-info{
+
+        .thread-info {
             min-width: 520px;
         }
-        article{
+
+        article {
             white-space: pre-line;
         }
-        .fullwidth{
+
+        .fullwidth {
             width: 100%;
         }
-        input.big{
+
+        input.big {
             width: 250px;
         }
-        .suggestion-list span{
+
+        .suggestion-list span {
             display: inline-block;
             padding: 5px 2px;
         }
-        .suggestion-list span:hover{
+
+        .suggestion-list span:hover {
             background: #ffffff2b;
         }
-        .suggestion-list li{
-            cursor: pointer;
 
+        .suggestion-list li {
+            cursor: pointer;
         }
-        .suggestion-list{
+
+        .suggestion-list {
             border-radius: 1px;
             padding: 7px;
             display: flex;
@@ -223,28 +229,24 @@
             </i>
         </div>
     </div>
-
     <div class="group-item flex-row">
         <div class="card mr-4">
-            <div id="heap" style="width: 260px;height: 250px;">
-            </div>
+            <div id="heap" style="width: 260px;height: 250px;"></div>
         </div>
         <div class="card ">
-            <div id="heap-line" style="height: 250px;width: 500px">
-            </div>
+            <div id="heap-line" style="height: 250px;width: 500px"></div>
         </div>
     </div>
-
     <div class="group-item flex-row">
         <div class="card  mr-4 flex-row">
-           <div>
-               <header>线程信息:</header>
-               <ul class="thread-lists height-200">
-                   <template v-for="(item, key) in dashboardDatas.threadIds">
-                       <li class="base-li" @click="threadClick(key)">{{item}} </li>
-                   </template>
-               </ul>
-           </div>
+            <div>
+                <header>线程信息:</header>
+                <ul class="thread-lists height-200">
+                    <template v-for="(item, key) in dashboardDatas.threadIds">
+                        <li class="base-li" @click="threadClick(key)">{{item}}</li>
+                    </template>
+                </ul>
+            </div>
             <div class="thread-info">
                 <header>详细信息:</header>
                 <article v-if="threadDumpInfo!=null" class="padding-10">
@@ -260,12 +262,11 @@
             </div>
         </div>
     </div>
-
     <div class="group-item flex-row">
         <div class="card fullwidth  mr-4 ">
             <header>Dump Class</header>
             <div class="flex-row">
-                <input  v-model="className" @input="classNameChange" class="big mr-4 base-input"/>
+                <input v-model="className" @input="classNameChange" class="big mr-4 base-input"/>
                 <button @click="dumpClass(className)">dump</button>
             </div>
             <ul class="suggestion-list">
@@ -273,35 +274,31 @@
                     <li @click="dumpClass(item)"><span>{{item}}</span></li>
                 </template>
             </ul>
-   </div>
+        </div>
     </div>
 </div>
 <script>
     let baseRootPath = "/100005";
-    let codeEditor =null;
     let jarApp = null;
     let app = {
         data() {
             return {
-                suggest:[],
-                codeEditor :null,
-                className:"",
-                threadDumpInfo:null,
+                suggest: [],
+                className: "",
+                threadDumpInfo: null,
                 dashboardDatas: {},
                 rootPath: baseRootPath,
                 historyDashboardDatas: [],
-                jId:new URLSearchParams(window.location.search).get("jid")
+                jId: new URLSearchParams(window.location.search).get("jid")
             }
         },
-        mounted(){
+        mounted() {
             let that = this
             setInterval(function () {
                 fetch(`${baseRootPath}/infos?jid=${that.jId}`)
                     .then(data => data.json())
                     .then((data) => {
-                        if (that.historyDashboardDatas.length>20){
-                            that.historyDashboardDatas.splice(0,1);
-                        }
+                        if (that.historyDashboardDatas.length > 20) that.historyDashboardDatas.splice(0, 1);
                         that.historyDashboardDatas.push(data);
                         that.dashboardDatas = data;
                         that.createHeapData(data);
@@ -311,23 +308,21 @@
             }, 1000)
         },
         methods: {
-            dumpClass(name=null){
-                if (name==null) name =this.className
+            dumpClass(name = null) {
+                if (name == null) name = this.className
                 fetch(`${baseRootPath}/dumpClass?className=${name}&jid=${this.jId}`)
                     .then(data => data.text())
                     .then((data) => {
-                        window.parent.postMessage({ "action": "open-application", "param": { "applicationId": "100005", "page": `code?perviewId=${data}` } }, "*")
+                        window.parent.postMessage({"action": "open-application", "param": {"property": {"autoSaveWindowSize": false,"windowTitle":name}, "applicationId": "100005", "page": `code?perviewId=${data}`}}, "*")
                     })
             },
-            classNameChange(e){
-                let  that =this;
-                fetch(`${baseRootPath}/suggestClassName?str=${ this.className}&jid=${this.jId}`)
+            classNameChange(e) {
+                let that = this;
+                fetch(`${baseRootPath}/suggestClassName?str=${this.className}&jid=${this.jId}`)
                     .then(data => data.json())
-                    .then((data) => {
-                        that.suggest=data;
-                    })
+                    .then((data) => {that.suggest = data;})
             },
-            createThreadLineData(response){
+            createThreadLineData(response) {
                 let data = this.historyDashboardDatas.map((item, index, arr) => parseInt(item["threadCount"]))
                 let option = {
                     xAxis: {
@@ -371,12 +366,12 @@
                 let heapLineChart = echarts.init(document.getElementById('thread-line'));
                 heapLineChart.setOption(option);
             },
-            threadClick(id){
-                let that =this;
+            threadClick(id) {
+                let that = this;
                 fetch(`${baseRootPath}/threadInfos?jid=${that.jId}&threadId=${id}`)
                     .then(data => data.json())
                     .then((data) => {
-                        that.threadDumpInfo=data
+                        that.threadDumpInfo = data
                     })
             },
             formatSize(bytes, decimalPoint) {
@@ -430,8 +425,8 @@
                 heapLineChart.setOption(option);
             },
             createHeapData(response) {
-                let used = parseInt(response["heapUsedSize"]) ;
-                let noused = (parseInt(response["heapSize"]) - parseInt(response["heapUsedSize"])) ;
+                let used = parseInt(response["heapUsedSize"]);
+                let noused = (parseInt(response["heapSize"]) - parseInt(response["heapUsedSize"]));
                 let option = {
                     title: {
                         text: '内存',
@@ -442,7 +437,7 @@
                     },
                     tooltip: {
                         trigger: 'item',
-                        formatter:(value) => this.formatSize(value.data.value)
+                        formatter: (value) => this.formatSize(value.data.value)
                     },
                     legend: {
                         orient: 'vertical',
@@ -456,7 +451,7 @@
                         {
                             laebl: {
                                 color: "#B9B8CE",
-                                normal:{
+                                normal: {
                                     formatter: 'as'
                                 }
                             },
@@ -465,7 +460,7 @@
                             radius: '50%',
                             data: [
                                 {value: used, name: `已使用`},
-                                {value: noused, name:  `未使用`},
+                                {value: noused, name: `未使用`},
                             ],
 
                             emphasis: {
@@ -491,15 +486,15 @@
             },
             convertMiliseconds(miliseconds) {
                 if (miliseconds === undefined) return "";
-                let days, hours, minutes, seconds, total_hours, total_minutes, total_seconds;
-                total_seconds = parseInt(Math.floor(miliseconds / 1000));
-                total_minutes = parseInt(Math.floor(total_seconds / 60));
-                total_hours = parseInt(Math.floor(total_minutes / 60));
-                days = parseInt(Math.floor(total_hours / 24));
+                let days, hours, minutes, seconds, totalHours, totalMinutes, totalSeconds;
+                totalSeconds = parseInt(Math.floor(miliseconds / 1000));
+                totalMinutes = parseInt(Math.floor(totalSeconds / 60));
+                totalHours = parseInt(Math.floor(totalMinutes / 60));
+                days = parseInt(Math.floor(totalHours / 24));
 
-                seconds = parseInt(total_seconds % 60);
-                minutes = parseInt(total_minutes % 60);
-                hours = parseInt(total_hours % 24);
+                seconds = parseInt(totalSeconds % 60);
+                minutes = parseInt(totalMinutes % 60);
+                hours = parseInt(totalHours % 24);
                 if (hours === 0) return `${minutes}分${seconds}秒`
                 if (days === 0) return `${hours}时${minutes}分${seconds}秒`
                 return `${days}天${hours}时${minutes}分${seconds}秒`

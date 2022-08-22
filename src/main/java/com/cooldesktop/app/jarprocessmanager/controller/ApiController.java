@@ -2,15 +2,15 @@ package com.cooldesktop.app.jarprocessmanager.controller;
 
 import com.cooldesktop.app.jarprocessmanager.bean.JarProcess;
 import com.cooldesktop.app.jarprocessmanager.server.MemCodeService;
-import com.cooldesktop.app.jarprocessmanager.utils.RMIDelayTask;
-import com.cooldesktop.app.jarprocessmanager.utils.SystemUtils;
-import com.cooldesktop.app.jarprocessmanager.utils.UrlArgBuilder;
-import com.cooldesktop.app.jarprocessmanager.utils.VMUtils;
+import com.cooldesktop.app.jarprocessmanager.utils.*;
 import com.cooldesktop.rmi.info.ClassInfo;
 import com.cooldesktop.rmi.info.CoolThreadInfo;
 import com.cooldesktop.rmi.info.JvmInfos;
 import com.cooldesktop.rmi.server.CoolDesktopRMIClient;
 import com.cooldesktop.rmi.server.IJvmCall;
+import com.sun.tools.classfile.ClassFile;
+import com.sun.tools.classfile.ConstantPoolException;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.function.Function;
@@ -60,23 +63,20 @@ public class ApiController {
      */
 
     @PostMapping("upload")
-    public String upload(@RequestParam("jid") int jId, @RequestParam MultipartFile file) {
-//        if (!processExist(jId)) return "加载代理失败，可能是此进程不存在";
-//        //回调文件，最后需要删除
-//        String callbackFile = null;
-//        Path localClassPath = null;
-//        WatchService watchService = null;
-//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//            IOUtils.copy(file.getInputStream(), outputStream);
-//            byte[] classBytes = outputStream.toByteArray();
-//
-//            //读取Class信息并且保存到本地
-//            ClassFile classFile = ClassFile.read(new ByteArrayInputStream(classBytes));
-//
-//            //这句执行玩可能回调文件已经发生改变，所以实现先创建一个观察对象
-//            VMUtils.loadAgent(jId, urlArgs);
-
-        return "";
+    public ResponseEntity<String> upload(@RequestParam("jid") int jId, @RequestParam MultipartFile file) {
+        if (!SystemUtils.hasProcess(jId)) return ResponseEntity.ok("加载代理失败，可能是此进程不存在");
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            IOUtils.copy(file.getInputStream(), outputStream);
+            byte[] classBytes = outputStream.toByteArray();
+            if (!FileUtils.isClass(classBytes)) return ResponseEntity.ok("不是一个有效的Class文件");
+            loadAgent(jId);
+            ClassFile classFile = ClassFile.read(new ByteArrayInputStream(classBytes));
+            return ResponseEntity.ok(jvmCallHashMap.get(jId).hotswap(classFile.getName(), classBytes));
+        } catch (IOException | ConstantPoolException e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.ok("替换失败");
     }
 
     @GetMapping("infos")
@@ -117,7 +117,7 @@ public class ApiController {
      */
 
     @GetMapping("suggestClassName")
-    private ResponseEntity< List<String>> classNameSuggest(@RequestParam("jid") int jId, @RequestParam("str") String str) throws RemoteException {
+    private ResponseEntity<List<String>> classNameSuggest(@RequestParam("jid") int jId, @RequestParam("str") String str) throws RemoteException {
         loadAgent(jId);
         if (!StringUtils.hasText(str)) return ResponseEntity.ok(Collections.emptyList());
         List<String> result = new ArrayList<>();
@@ -127,7 +127,7 @@ public class ApiController {
                 if (classInfo.getSimpName().startsWith(str)) result.add(classInfo.getClassName());
             }
         });
-        if (result.size()>10)  return ResponseEntity.ok(result.subList(0,10));
+        if (result.size() > 10) return ResponseEntity.ok(result.subList(0, 10));
         return ResponseEntity.ok(result);
     }
 
