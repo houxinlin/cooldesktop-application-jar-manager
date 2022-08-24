@@ -110,6 +110,11 @@ public class ApiController {
         return ResponseEntity.ok(jvmCallHashMap.get(jId).getAllLoadedClass());
     }
 
+    @GetMapping("gc")
+    private ResponseEntity<Boolean> gc(@RequestParam("jid") int jId) throws RemoteException {
+        loadAgent(jId);
+        return ResponseEntity.ok(jvmCallHashMap.get(jId).gc());
+    }
 
     /**
      * @description: 类自动建议

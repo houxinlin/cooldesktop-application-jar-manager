@@ -66,3 +66,24 @@ button{
 ul,li{
     list-style: none;
 }
+
+.table-header{
+    display: flex;
+}
+.table-header li{
+    flex: 1;
+}
+.table-body li{
+    margin: 4px 0;
+    padding: 4px;
+}
+.table-body li:hover{
+    background: #4e4e4e87;
+}
+.flex-1{
+    flex: 1;
+}
+.group-item header.title{
+    font-size: 18px;
+    margin: 11px 0;
+}

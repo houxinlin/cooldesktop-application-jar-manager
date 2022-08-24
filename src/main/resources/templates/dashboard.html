@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="index.css">
     <script src="echarts.min.js"></script>
     <style>
+        .el-table {
+            background-color: inherit !important;
+            color: #fafafa;
+        }
+
+        .el-table tr {
+            bac
+        }
+
         .flex-row {
             display: flex;
         }
@@ -41,7 +50,8 @@
             background: #9b9b9b0d;
             padding: 7px;
             border-radius: 4px;
-            min-width: 130px;
+            box-sizing: border-box;
+            /*min-width: 130px;*/
         }
 
         .card.no-radius {
@@ -79,7 +89,7 @@
         }
 
         .thread-info {
-            min-width: 520px;
+            min-width: 650px;
         }
 
         article {
@@ -112,6 +122,11 @@
             padding: 7px;
             display: flex;
             flex-direction: column;
+        }
+
+        .height-500 {
+            height: 500px;
+            overflow: auto;
         }
     </style>
 </head>
@@ -231,13 +246,19 @@
     </div>
     <div class="group-item flex-row">
         <div class="card mr-4">
-            <div id="heap" style="width: 260px;height: 250px;"></div>
+            <div id="heap" style="width: 280px;height: 280px;"></div>
         </div>
-        <div class="card ">
-            <div id="heap-line" style="height: 250px;width: 500px"></div>
+        <div class="card flex-1">
+            <div id="heap-line" style="height: 250px;width:100%"></div>
         </div>
     </div>
+
     <div class="group-item flex-row">
+        <div class="card flex-1">
+            <div id="thread-line" style="height: 350px;width: 100%"></div>
+        </div>
+    </div>
+    <div class="group-item">
         <div class="card  mr-4 flex-row">
             <div>
                 <header>线程信息:</header>
@@ -247,97 +268,154 @@
                     </template>
                 </ul>
             </div>
-            <div class="thread-info">
+            <div class="flex-1">
                 <header>详细信息:</header>
                 <article v-if="threadDumpInfo!=null" class="padding-10">
                     <div>线程状态:{{threadDumpInfo.threadState}}</div>
                     <div>线程ID:{{threadDumpInfo.threadId}}</div>
+                    <br>
+                    <div>堆栈跟踪:</div>
                     {{threadDumpInfo.trace}}
                 </article>
             </div>
 
         </div>
-        <div class="card ">
-            <div id="thread-line" style="height: 250px; width: 500px">
-            </div>
-        </div>
     </div>
-    <div class="group-item flex-row">
-        <div class="card fullwidth  mr-4 ">
-            <header>Dump Class</header>
-            <div class="flex-row">
-                <input v-model="className" @input="classNameChange" class="big mr-4 base-input"/>
-                <button @click="dumpClass(className)">dump</button>
+    <div class="group-item">
+        <header>Dump Class</header>
+        <article>
+            <div class="card fullwidth  mr-4 ">
+                <div class="flex-row">
+                    <input v-model="className" @input="classNameChange" class="big mr-4 base-input"/>
+                    <button @click="dumpClass(className)">dump</button>
+                </div>
+                <ul class="suggestion-list">
+                    <template v-for="item in suggest">
+                        <li @click="dumpClass(item)"><span>{{item}}</span></li>
+                    </template>
+                </ul>
             </div>
-            <ul class="suggestion-list">
-                <template v-for="item in suggest">
-                    <li @click="dumpClass(item)"><span>{{item}}</span></li>
+        </article>
+
+    </div>
+
+    <div class="group-item height-500">
+        <header class="title">对象分布</header>
+        <article>
+            <header>
+                <ul class="table-header">
+                    <li>实例数</li>
+                    <li>大小</li>
+                    <li>类名</li>
+                </ul>
+            </header>
+            <ul class="table-body">
+                <template v-for="(item,index) in dashboardDatas.classInstanceInfos ">
+                    <li class="flex-row">
+                        <span class="flex-1">{{item.instances}}</span>
+                        <span class="flex-1">{{formatSize(item.bytes)}}</span>
+                        <span class="flex-1">{{item.className}}</span>
+
+                    </li>
+
                 </template>
             </ul>
-        </div>
+        </article>
     </div>
 </div>
 <script>
+
+
     let baseRootPath = "/100005";
     let jarApp = null;
     let app = {
         data() {
             return {
+                heapLineChart: null,
+                threadLineChart: null,
+                heapChart: null,
                 suggest: [],
                 className: "",
                 threadDumpInfo: null,
                 dashboardDatas: {},
                 rootPath: baseRootPath,
                 historyDashboardDatas: [],
-                jId: new URLSearchParams(window.location.search).get("jid")
+                jId: new URLSearchParams(window.location.search).get("jid"),
+                timeRecored: []
             }
         },
         mounted() {
+            window.addEventListener("message", this.receiveMessage, true);
+            this.heapLineChart = echarts.init(document.getElementById('heap-line'));
+            this.threadLineChart = echarts.init(document.getElementById('thread-line'));
+            this.heapChart = echarts.init(document.getElementById('heap'));
             let that = this
             setInterval(function () {
                 fetch(`${baseRootPath}/infos?jid=${that.jId}`)
                     .then(data => data.json())
                     .then((data) => {
-                        if (that.historyDashboardDatas.length > 20) that.historyDashboardDatas.splice(0, 1);
                         that.historyDashboardDatas.push(data);
+                        let date = new Date();
+                        that.timeRecored.push(date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds())
                         that.dashboardDatas = data;
                         that.createHeapData(data);
                         that.createHeapLineData(data);
                         that.createThreadLineData(data);
                     })
-            }, 1000)
+            }, 2000)
         },
         methods: {
+            receiveMessage(event) {
+                if (event.data['eventName'] === "windowEvent" && event.data["detailName"] === "sizeChange") {
+                    this.heapLineChart.resize()
+                    this.threadLineChart.resize()
+                    this.heapChart.resize()
+                }
+            },
             dumpClass(name = null) {
                 if (name == null) name = this.className
                 fetch(`${baseRootPath}/dumpClass?className=${name}&jid=${this.jId}`)
                     .then(data => data.text())
                     .then((data) => {
-                        window.parent.postMessage({"action": "open-application", "param": {"property": {"autoSaveWindowSize": false,"windowTitle":name}, "applicationId": "100005", "page": `code?perviewId=${data}`}}, "*")
+                        window.parent.postMessage({
+                            "action": "open-application",
+                            "param": {
+                                "property": {
+                                    "windowBackground": "#1e1e1e",
+                                    "autoSaveWindowSize": false,
+                                    "windowTitle": name
+                                }, "applicationId": "100005", "page": `code?perviewId=${data}`
+                            }
+                        }, "*")
                     })
             },
             classNameChange(e) {
                 let that = this;
                 fetch(`${baseRootPath}/suggestClassName?str=${this.className}&jid=${this.jId}`)
                     .then(data => data.json())
-                    .then((data) => {that.suggest = data;})
+                    .then((data) => {
+                        that.suggest = data;
+                    })
+            },
+            getThreadCountGroupByState(state) {
+                return this.historyDashboardDatas.map((item, index, arr) => parseInt(item["threadCountGroupByState"][state]) || 0);
             },
             createThreadLineData(response) {
                 let data = this.historyDashboardDatas.map((item, index, arr) => parseInt(item["threadCount"]))
                 let option = {
                     xAxis: {
                         type: 'category',
+                        data: this.timeRecored
                     },
                     title: {
                         text: '实时线程数',
-                        left: 'center',
+                        left: 'left',
                         textStyle: {
                             color: "#ffffff",
                         }
                     },
                     legend: {
-                        orient: 'vertical',
-                        left: 'left',
+
                         textStyle: {
                             color: "#ffffff",
                         }
@@ -355,16 +433,40 @@
                     },
                     series: [
                         {
-                            color: "#c548a0",
+                            name: "等待数量",
+                            color: "#98123b",
+                            data: this.getThreadCountGroupByState("WAITING"),
+                            type: 'line',
+                            smooth: true,
+                            // areaStyle: {}
+                        },
+                        {
+                            name: "等待数量(TIMED)",
+                            color: "#2e38b4",
+                            data: this.getThreadCountGroupByState("TIMED_WAITING"),
+                            type: 'line',
+                            smooth: true,
+                            // areaStyle: {}
+                        },
+                        {
+                            name: "运行数量",
+                            color: "#179a44",
+                            data: this.getThreadCountGroupByState("RUNNABLE"),
+                            type: 'line',
+                            smooth: true,
+                            // areaStyle: {}
+                        },
+                        {
+                            name: "总共数量",
+                            color: "#b48a1b",
                             data: data,
                             type: 'line',
                             smooth: true,
-                            areaStyle: {}
+                            // areaStyle: {}
                         }
                     ]
                 };
-                let heapLineChart = echarts.init(document.getElementById('thread-line'));
-                heapLineChart.setOption(option);
+                this.threadLineChart.setOption(option);
             },
             threadClick(id) {
                 let that = this;
@@ -385,6 +487,7 @@
                 let option = {
                     xAxis: {
                         type: 'category',
+                        data: this.timeRecored
                     },
                     title: {
                         text: '实时堆内存',
@@ -421,15 +524,14 @@
                         }
                     ]
                 };
-                let heapLineChart = echarts.init(document.getElementById('heap-line'));
-                heapLineChart.setOption(option);
+                this.heapLineChart.setOption(option);
             },
             createHeapData(response) {
                 let used = parseInt(response["heapUsedSize"]);
                 let noused = (parseInt(response["heapSize"]) - parseInt(response["heapUsedSize"]));
                 let option = {
                     title: {
-                        text: '内存',
+                        text: '堆内存比例',
                         left: 'center',
                         textStyle: {
                             color: "#ffffff",
@@ -473,8 +575,7 @@
                         }
                     ]
                 };
-                let heapChart = echarts.init(document.getElementById('heap'));
-                heapChart.setOption(option)
+                this.heapChart.setOption(option)
             },
             getData(miliseconds) {
                 if (miliseconds === undefined) return "";

@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 public class FileUtils {
     public static String getWorkPath() {
         try {
-            Path path = Paths.get(System.getProperty("user.dir"), "work");
+            Path  path = Paths.get(System.getProperty("user.home"), "cooldesktop-work","jar-process-manager");
             if (!Files.exists(path)) Files.createDirectories(path);
             return path.toString();
         } catch (IOException e) {
@@ -29,7 +29,4 @@ public class FileUtils {
                 (0xff & data[3]);
     }
 
-    public static String createTempFile(int jid, String className) {
-        return (Paths.get(getWorkPath(), jid + "_" + className + ".tmp")).toString();
-    }
 }

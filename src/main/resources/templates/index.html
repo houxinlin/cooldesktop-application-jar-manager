@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!--    <base href="/desktop/webapplication/100005/static/">-->
+    <base href="/desktop/webapplication/100005/static/">
     <meta charset="UTF-8">
     <title>Jar管理</title>
     <link rel="stylesheet" href="element.css">
@@ -45,9 +45,10 @@
         </el-table-column>
         <el-table-column label="操作">
             <template #default="scope">
+                <el-button size="small" type="warning" @click="gc(scope.$index, scope.row)">GC</el-button>
                 <el-button size="small" type="primary" @click="dashboard(scope.$index, scope.row)">仪表盘</el-button>
                 <el-button size="small" type="success" @click="hotSwap(scope.$index, scope.row)">热替换</el-button>
-                <el-button size="small" type="warning" @click="handlerStopClick(scope.$index, scope.row)">终止</el-button>
+                <el-button size="small" type="danger" @click="stopJvmProcess(scope.$index, scope.row)">终止</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -102,6 +103,14 @@
             }, 1000)
         },
         methods: {
+            gc(index,row){
+                fetch(`${baseRootPath}/gc?jid=`+row.id).then(data => data.text()).then((data) => {
+                    this.$notify({
+                        title: '成功',
+                        type: 'success'
+                    });
+                })
+            },
             dialogClose(){
                 this.dialogClassUploadVisible=false;
                 this.hotswapAlert="";
@@ -124,12 +133,16 @@
             uploadSuccessCallback(response, file, fileList) {
                 this.hotswapAlert = response
             },
-            handlerStopClick(index, row) {
+            stopJvmProcess(index, row) {
                 fetch(`${baseRootPath}/stop`, {
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     method: "POST",
                     body: `id=${row.id}`
-                }).then(data => data.json()).then((data) => {
+                }).then(data => data.text()).then((data) => {
+                    this.$notify({
+                        title: '成功',
+                        type: 'success'
+                    });
                 })
             },
             viewJvmProperties(index, row) {
